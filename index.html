@@ -1,45 +1,44 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />Download<title>titlee
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>资源下载页面</title>
 <script type="text/javascript">
-function MM_jumpMenu(targ,selObj,restore){ //v3.0
-  eval(targ+".location='"+selObj.options[selObj.selectedIndex].value+"'");
-  if (restore) selObj.selectedIndex=0;
-}http
+// 下拉菜单跳转函数（保持原功能，优化注释）
+function MM_jumpMenu(targ, selObj, restore) { //v3.0
+  eval(targ + ".location='" + selObj.options[selObj.selectedIndex].value + "'");
+  if (restore) selObj.selectedIndex = 0;
+}
 </script>
 </head>
-
 <body>
-
+<!-- 下拉菜单下载区 -->
 <p>
-  <select name="jumpMenu" id="jumpMenu" onchange="MM_jumpMenu('parent',this,0)">
+  <select name="jumpMenu" id="jumpMenu" onchange="MM_jumpMenu('parent', this, 0)">
+    <option value="">请选择下载资源</option> <!-- 新增默认提示项 -->
     <option value="https://wwwk.qyshare.com:2999/s/302">302网盘</option>
     <option value="https://www.now61.cn/f/7z3WcW/302%20%281%29.zip">302直链</option>
     <option value="https://wwwk.qyshare.com:2999/s/smmwe">smmwe网盘</option>
     <option value="https://www.now61.cn/f/NLDmup/SMM_WE%203.5.1%20Installer%20%282%29.exe">smmwe直链(exe)</option>
     <option value="https://www.now61.cn/f/xjzNC0/SMM_WE%203.5.1%20Portable.zip">smmwe直链(zip)</option>
   </select>
-</a>选择下载</p>
-<p>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  </h3>
+  选择后自动跳转下载
 </p>
-<p>或者点下方链接</p>
-<p>&nbsp;</p>
-<p><a href="https://wwwk.qyshare.com:2999/s/302" title="first">1:这里(下载302)  </a></p>
-<p>点了直接下载：</p>
-<p><a href="https://www.now61.cn/f/7z3WcW/302%20%281%29.zip">302.zip(备用)</a></p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p><a href="https://wwwk.qyshare.com:2999/s/smmwe" accesskey="2">2:这里(下载+安装smmwe)</a></p>
-<p>点了直接下载：</p>
-<p><a href="https://www.now61.cn/f/NLDmup/SMM_WE%203.5.1%20Installer%20%282%29.exe
-">smmwe下载(建议)备用(exe)</a></p>
-<p><a href="
-https://www.now61.cn/f/xjzNC0/SMM_WE%203.5.1%20Portable.zip">smmwe备用下载(zip)</a></p>
 
-<p>&nbsp;</p>
+<hr style="margin: 20px 0;" /> <!-- 替换原分隔符，更规范 -->
+
+<!-- 直接链接下载区 -->
+<p>或点击下方直接下载链接：</p>
+
+<p><strong>1. 302 相关下载</strong></p>
+<p><a href="https://wwwk.qyshare.com:2999/s/302" title="first">网盘下载（302）</a></p>
+<p><a href="https://www.now61.cn/f/7z3WcW/302%20%281%29.zip">直接下载：302.zip（备用）</a></p>
+
+<p>&nbsp;</p> <!-- 保留适当空行，提升可读性 -->
+
+<p><strong>2. smmwe 相关下载</strong></p>
+<p><a href="https://wwwk.qyshare.com:2999/s/smmwe" accesskey="2">网盘下载+安装（smmwe）</a></p>
+<p><a href="https://www.now61.cn/f/NLDmup/SMM_WE%203.5.1%20Installer%20%282%29.exe">直接下载：smmwe安装包.exe（推荐）</a></p>
+<p><a href="https://www.now61.cn/f/xjzNC0/SMM_WE%203.5.1%20Portable.zip">直接下载：smmwe绿色版.zip（备用）</a></p>
 </body>
 </html>
-
-
