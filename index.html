@@ -1,19 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="UTF-8">
 <title>资源下载页面</title>
-<style type="text/css">
+<!-- DNS预解析：优先解析各节点域名，提升加载速度 -->
+<link rel="dns-prefetch" href="//raw.githubusercontent.com">
+<link rel="dns-prefetch" href="//github.elemecdn.com">
+<link rel="dns-prefetch" href="//gcore.jsdelivr.net">
+<style>
   body { font-family: Arial, sans-serif; margin: 20px; }
-  video, img { max-width: 100%; height: auto; }
+  video, img { max-width: 100%; height: auto; margin: 10px 0; }
   .section { margin-bottom: 30px; }
+  .load-tip { color: #666; font-size: 14px; }
 </style>
-<script type="text/javascript">
-function MM_jumpMenu(targ, selObj, restore) {
-  eval(targ + ".location='" + selObj.options[selObj.selectedIndex].value + "'");
-  if (restore) selObj.selectedIndex = 0;
-}
-</script>
 </head>
 <body>
 
@@ -22,7 +21,7 @@ function MM_jumpMenu(targ, selObj, restore) {
 <!-- 下拉菜单下载区 -->
 <div class="section">
   <p>
-    <select name="jumpMenu" id="jumpMenu" onchange="MM_jumpMenu('parent', this, 0)">
+    <select name="jumpMenu" id="jumpMenu" onchange="parent.location=this.value">
       <option value="">请选择下载资源</option>
       <option value="https://wwwk.qyshare.com:2999/s/302">302网盘</option>
       <option value="https://www.now61.cn/f/7z3WcW/302%20%281%29.zip">302直链</option>
@@ -39,7 +38,6 @@ function MM_jumpMenu(targ, selObj, restore) {
 <!-- 直接链接下载区 -->
 <div class="section">
   <p>或点击下方直接下载链接：</p>
-
   <p><strong>1. 302 相关下载</strong></p>
   <p><a href="https://wwwk.qyshare.com:2999/s/302" title="first">网盘下载（302）</a></p>
   <p><a href="https://www.now61.cn/f/7z3WcW/302%20%281%29.zip">直接下载：302.zip（备用）</a></p>
@@ -54,26 +52,77 @@ function MM_jumpMenu(targ, selObj, restore) {
 
 <hr style="margin: 20px 0;" />
 
-<!-- GitHub 视频播放区 -->
+<!-- 视频区（国际GitHub→国内饿了么CDN→jsDelivr降级） -->
 <div class="section">
   <h2>资讯</h2>
-  <video controls>
-    <source src="https://cdn.jsdelivr.net/gh/linker9527/linker9527/1.mp4" type="video/mp4">
-    您的浏览器不支持 HTML5 视频播放，请更新浏览器。
+  <p class="load-tip">加载顺序：GitHub（国际）→ 饿了么CDN（国内）→ jsDelivr（备用）</p>
+  <video id="myVideo" controls crossorigin="anonymous" preload="metadata">
+    <!-- 1. 国际优先：GitHub原始链接（适配海外网络） -->
+    <source src="https://raw.githubusercontent.com/linker9527/linker9527/main/1.mp4" type="video/mp4" data-source="github">
+    <!-- 2. 国内降级：饿了么GitHub专用CDN（同步快，国内访问稳定） -->
+    <source src="https://github.elemecdn.com/linker9527/linker9527/main/1.mp4" type="video/mp4" data-source="eleme">
+    <!-- 3. 最终备用：jsDelivr高可用节点（gcore节点国内可用性高） -->
+    <source src="https://gcore.jsdelivr.net/gh/linker9527/linker9527/1.mp4" type="video/mp4" data-source="jsdelivr">
+    <!-- 兜底方案：提供下载链接 -->
+    视频加载失败，请<a href="https://github.elemecdn.com/linker9527/linker9527/main/1.mp4" download>点击下载</a>观看
   </video>
-  <p>视频来源：<a href="https://github.com/linker9527/linker9527/blob/main/1.mp4">GitHub 仓库</a></p>
 </div>
 
-<hr style="margin: 20px 0;" />
-
-<!-- GitHub PNG 图片区 -->
+<!-- 图片区（国际GitHub→国内饿了么CDN→jsDelivr降级） -->
 <div class="section">
-  <h2>广告招租</h2>
-  <img src="https://cdn.jsdelivr.net/gh/linker9527/linker9527/1.png" alt="预览图片" />
-  <p>图片来源：<a href="https://github.com/linker9527/linker9527/blob/main/1.png">GitHub 仓库</a></p>
+  <h2>广告</h2>
+  <p class="load-tip">加载顺序：GitHub（国际）→ 饿了么CDN（国内）→ jsDelivr（备用）</p>
+  <img 
+    src="https://raw.githubusercontent.com/linker9527/linker9527/main/1.png"  <!-- 1. 国际优先：GitHub -->
+    data-eleme="https://github.elemecdn.com/linker9527/linker9527/main/1.png"  <!-- 2. 国内降级：饿了么CDN -->
+    data-jsdelivr="https://gcore.jsdelivr.net/gh/linker9527/linker9527/1.png"  <!-- 3. 最终备用：jsDelivr -->
+    onerror="handleImgError(this)"  <!-- 触发降级逻辑 -->
+    alt="预览图片"
+  >
 </div>
+
+<!-- 加载容错脚本：确保三级降级逻辑生效 -->
+<script>
+// 视频三级降级逻辑
+const video = document.getElementById('myVideo');
+let videoRetryCount = 0;
+const maxRetry = 2; // 最大重试次数（避免无限循环）
+
+video.addEventListener('error', function() {
+  if (videoRetryCount >= maxRetry) return;
+  
+  const sources = video.querySelectorAll('source');
+  const currentSource = Array.from(sources).find(s => s.src === video.currentSrc);
+  
+  if (currentSource) {
+    const sourceType = currentSource.dataset.source;
+    // 按顺序切换：GitHub→饿了么CDN→jsDelivr
+    if (sourceType === 'github') {
+      video.src = sources[1].src; // 切饿了么CDN
+    } else if (sourceType === 'eleme') {
+      video.src = sources[2].src; // 切jsDelivr
+    }
+    video.load();
+    videoRetryCount++;
+  }
+});
+
+// 图片三级降级逻辑
+function handleImgError(img) {
+  // 若当前是GitHub链接，切饿了么CDN
+  if (img.src.includes('raw.githubusercontent.com')) {
+    img.src = img.dataset.eleme;
+  } 
+  // 若当前是饿了么CDN链接，切jsDelivr
+  else if (img.src.includes('github.elemecdn.com')) {
+    img.src = img.dataset.jsdelivr;
+  }
+  // 所有链接失败时，显示默认图
+  else {
+    img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  }
+}
+</script>
 
 </body>
 </html>
-
-
