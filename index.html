@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>资源下载页面</title>
-<!-- DNS预解析：优先解析各节点域名，提升加载速度 -->
+<!-- DNS预解析 -->
 <link rel="dns-prefetch" href="//raw.githubusercontent.com">
 <link rel="dns-prefetch" href="//github.elemecdn.com">
 <link rel="dns-prefetch" href="//gcore.jsdelivr.net">
@@ -11,7 +11,9 @@
   body { font-family: Arial, sans-serif; margin: 20px; }
   video, img { max-width: 100%; height: auto; margin: 10px 0; }
   .section { margin-bottom: 30px; }
-  .load-tip { color: #666; font-size: 14px; }
+  .load-status { color: #666; font-size: 14px; margin-top: 5px; }
+  .load-status.success { color: #4CAF50; }
+  .load-status.error { color: #F44336; }
 </style>
 </head>
 <body>
@@ -52,74 +54,89 @@
 
 <hr style="margin: 20px 0;" />
 
-<!-- 视频区（国际GitHub→国内饿了么CDN→jsDelivr降级） -->
+<!-- 视频区 -->
 <div class="section">
-  <h2>资讯</h2>
-  <p class="load-tip">加载顺序：GitHub（国际）→ 饿了么CDN（国内）→ jsDelivr（备用）</p>
+  <h2>资讯视频</h2>
   <video id="myVideo" controls crossorigin="anonymous" preload="metadata">
-    <!-- 1. 国际优先：GitHub原始链接（适配海外网络） -->
     <source src="https://raw.githubusercontent.com/linker9527/linker9527/main/1.mp4" type="video/mp4" data-source="github">
-    <!-- 2. 国内降级：饿了么GitHub专用CDN（同步快，国内访问稳定） -->
     <source src="https://github.elemecdn.com/linker9527/linker9527/main/1.mp4" type="video/mp4" data-source="eleme">
-    <!-- 3. 最终备用：jsDelivr高可用节点（gcore节点国内可用性高） -->
     <source src="https://gcore.jsdelivr.net/gh/linker9527/linker9527/1.mp4" type="video/mp4" data-source="jsdelivr">
-    <!-- 兜底方案：提供下载链接 -->
-    视频加载失败，请<a href="https://github.elemecdn.com/linker9527/linker9527/main/1.mp4" download>点击下载</a>观看
+    您的浏览器不支持视频播放，请<a href="https://gcore.jsdelivr.net/gh/linker9527/linker9527/1.mp4" download>点击下载</a>观看。
   </video>
+  <div id="videoStatus" class="load-status">加载中...</div>
 </div>
 
-<!-- 图片区（国际GitHub→国内饿了么CDN→jsDelivr降级） -->
+<!-- 图片区 -->
 <div class="section">
-  <h2>广告</h2>
-  <p class="load-tip">加载顺序：GitHub（国际）→ 饿了么CDN（国内）→ jsDelivr（备用）</p>
+  <h2>广告图片</h2>
   <img 
-    src="https://raw.githubusercontent.com/linker9527/linker9527/main/1.png"  <!-- 1. 国际优先：GitHub -->
-    data-eleme="https://github.elemecdn.com/linker9527/linker9527/main/1.png"  <!-- 2. 国内降级：饿了么CDN -->
-    data-jsdelivr="https://gcore.jsdelivr.net/gh/linker9527/linker9527/1.png"  <!-- 3. 最终备用：jsDelivr -->
-    onerror="handleImgError(this)"  <!-- 触发降级逻辑 -->
-    alt="预览图片"
+    id="myImg"
+    src="https://raw.githubusercontent.com/linker9527/linker9527/main/1.png" 
+    data-eleme="https://github.elemecdn.com/linker9527/linker9527/main/1.png"
+    data-jsdelivr="https://gcore.jsdelivr.net/gh/linker9527/linker9527/1.png"
+    alt="广告图片"
+    onload="imgLoaded(this, 'github')"
+    onerror="imgError(this)"
   >
+  <div id="imgStatus" class="load-status">加载中...</div>
 </div>
 
-<!-- 加载容错脚本：确保三级降级逻辑生效 -->
 <script>
-// 视频三级降级逻辑
+// 视频加载提示
 const video = document.getElementById('myVideo');
+const videoStatus = document.getElementById('videoStatus');
 let videoRetryCount = 0;
-const maxRetry = 2; // 最大重试次数（避免无限循环）
+const maxRetry = 2;
 
-video.addEventListener('error', function() {
-  if (videoRetryCount >= maxRetry) return;
-  
-  const sources = video.querySelectorAll('source');
-  const currentSource = Array.from(sources).find(s => s.src === video.currentSrc);
-  
-  if (currentSource) {
-    const sourceType = currentSource.dataset.source;
-    // 按顺序切换：GitHub→饿了么CDN→jsDelivr
-    if (sourceType === 'github') {
-      video.src = sources[1].src; // 切饿了么CDN
-    } else if (sourceType === 'eleme') {
-      video.src = sources[2].src; // 切jsDelivr
-    }
-    video.load();
-    videoRetryCount++;
-  }
+video.addEventListener('loadeddata', function() {
+  const currentSource = Array.from(video.querySelectorAll('source')).find(s => s.src === video.currentSrc);
+  const sourceType = currentSource?.dataset.source || 'unknown';
+  videoStatus.textContent = `✅ 已从 ${sourceType} 节点加载`;
+  videoStatus.className = 'load-status success';
 });
 
-// 图片三级降级逻辑
-function handleImgError(img) {
-  // 若当前是GitHub链接，切饿了么CDN
+video.addEventListener('error', function() {
+  if (videoRetryCount >= maxRetry) {
+    videoStatus.textContent = '❌ 所有节点均无法加载';
+    videoStatus.className = 'load-status error';
+    return;
+  }
+
+  const sources = video.querySelectorAll('source');
+  const currentSource = Array.from(sources).find(s => s.src === video.currentSrc);
+  const sourceType = currentSource?.dataset.source || 'unknown';
+
+  videoStatus.textContent = `❌ ${sourceType} 节点加载失败，正在切换...`;
+  videoStatus.className = 'load-status error';
+
+  if (sourceType === 'github') {
+    video.src = sources[1].src; // 切饿了么CDN
+  } else if (sourceType === 'eleme') {
+    video.src = sources[2].src; // 切jsDelivr
+  }
+  video.load();
+  videoRetryCount++;
+});
+
+// 图片加载提示
+function imgLoaded(img, sourceType) {
+  const imgStatus = document.getElementById('imgStatus');
+  imgStatus.textContent = `✅ 已从 ${sourceType} 节点加载`;
+  imgStatus.className = 'load-status success';
+}
+
+function imgError(img) {
+  const imgStatus = document.getElementById('imgStatus');
   if (img.src.includes('raw.githubusercontent.com')) {
     img.src = img.dataset.eleme;
-  } 
-  // 若当前是饿了么CDN链接，切jsDelivr
-  else if (img.src.includes('github.elemecdn.com')) {
+    imgStatus.textContent = '❌ GitHub节点加载失败，正在切换到饿了么CDN...';
+  } else if (img.src.includes('github.elemecdn.com')) {
     img.src = img.dataset.jsdelivr;
-  }
-  // 所有链接失败时，显示默认图
-  else {
+    imgStatus.textContent = '❌ 饿了么CDN节点加载失败，正在切换到jsDelivr...';
+  } else {
     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    imgStatus.textContent = '❌ 所有节点均无法加载';
+    imgStatus.className = 'load-status error';
   }
 }
 </script>
